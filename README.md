@@ -10,13 +10,17 @@ A private, Notion-inspired workspace for managing internship applications, deadl
 - Upcoming deadlines and follow-up reminders
 - Dedicated interview and contact views
 - Add, edit, inspect, and delete applications
+- Editable candidate profile with role, location, eligibility, and work-mode preferences
+- Private multi-version CV library backed by MongoDB GridFS
+- Server-side PDF text extraction with reviewable skill suggestions
+- Primary CV selection for future job-matching workflows
 - MongoDB persistence
 - Password-protected single-owner access
 - Responsive light interface
 
 ## Requirements
 
-- Node.js 20.9 or newer
+- Node.js 20.16 or newer
 - A MongoDB Atlas database or another MongoDB deployment
 - A Vercel account for deployment
 
