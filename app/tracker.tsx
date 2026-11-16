@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import {
   BriefcaseBusiness, CalendarClock, Check, ChevronRight, CircleUserRound,
   ContactRound, FileText, LayoutDashboard, Plus, Search,
@@ -20,6 +21,11 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupConte
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Toaster } from "@/components/ui/sonner";
+
+const CandidateProfileView = dynamic(
+  () => import("@/components/profile/candidate-profile-view").then((module) => module.CandidateProfileView),
+  { loading: () => <div className="py-20 text-center text-sm text-muted-foreground">Loading candidate profile…</div> },
+);
 
 const statuses = ["Interested", "Preparing Application", "Applied", "Online Assessment", "Interview Scheduled", "Interviewing", "Waiting for Response", "Offer Received", "Accepted", "Rejected", "Withdrawn", "Closed/Expired"];
 const priorities = ["High", "Medium", "Low"];
@@ -41,7 +47,7 @@ type Application = {
 };
 
 type Draft = Omit<Application, "id" | "createdAt" | "updatedAt">;
-type View = "overview" | "applications" | "interviews" | "contacts";
+type View = "overview" | "applications" | "interviews" | "contacts" | "profile";
 
 const emptyDraft: Draft = {
   company: "", role: "", track: "Full-Stack", location: "", workMode: "Remote",
@@ -184,6 +190,7 @@ export function InternshipTracker({ displayName }: { displayName: string }) {
     { id: "applications" as View, label: "Applications", icon: BriefcaseBusiness, count: applications.length },
     { id: "interviews" as View, label: "Interviews", icon: UsersRound, count: interviewing.length },
     { id: "contacts" as View, label: "Contacts", icon: ContactRound, count: applications.filter((app) => app.contactPerson).length },
+    { id: "profile" as View, label: "Profile & CVs", icon: CircleUserRound, count: null },
   ];
 
   return <SidebarProvider>
@@ -210,12 +217,13 @@ export function InternshipTracker({ displayName }: { displayName: string }) {
       </SidebarFooter>
     </Sidebar>
     <SidebarInset className="min-w-0 bg-[#fbfcff]">
-      <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b bg-[#fbfcff]/90 px-4 backdrop-blur-md md:px-8"><SidebarTrigger className="md:hidden" /><div className="flex items-center gap-2 text-sm text-muted-foreground"><span>My workspace</span><ChevronRight className="size-3.5" /><span className="font-medium text-foreground capitalize">{view}</span></div><div className="ml-auto md:hidden"><Button size="sm" onClick={openCreate}><Plus />Add</Button></div></header>
+      <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b bg-[#fbfcff]/90 px-4 backdrop-blur-md md:px-8"><SidebarTrigger className="md:hidden" /><div className="flex items-center gap-2 text-sm text-muted-foreground"><span>My workspace</span><ChevronRight className="size-3.5" /><span className="font-medium text-foreground capitalize">{view === "profile" ? "Profile & CVs" : view}</span></div>{view !== "profile" && <div className="ml-auto md:hidden"><Button size="sm" onClick={openCreate}><Plus />Add</Button></div>}</header>
       <div className="mx-auto w-full max-w-[1480px] px-4 py-7 md:px-8 md:py-10">
         {view === "overview" && <Overview name={firstName(displayName)} applications={applications} active={active.length} interviewing={interviewing.length} offers={offers.length} responseRate={responseRate} nextItems={nextItems} loading={loading} onAdd={openCreate} onOpen={setSelected} onViewApplications={() => setView("applications")} />}
         {view === "applications" && <ApplicationsView applications={filtered} total={applications.length} loading={loading} search={search} filter={filter} onSearch={setSearch} onFilter={setFilter} onAdd={openCreate} onOpen={setSelected} />}
         {view === "interviews" && <InterviewsView applications={applications.filter((app) => app.interviewDate || app.interviewStage || app.assessment)} onOpen={setSelected} onAdd={openCreate} />}
         {view === "contacts" && <ContactsView applications={applications.filter((app) => app.contactPerson || app.contactInfo || app.referral)} onOpen={setSelected} onAdd={openCreate} />}
+        {view === "profile" && <CandidateProfileView displayName={displayName} />}
       </div>
     </SidebarInset>
 
